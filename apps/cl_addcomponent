@@ -1,0 +1,52 @@
+#!/usr/bin/python
+"""
+####################################################################
+ cl_addcomponent
+ Description:
+
+This simple recipe adds a component to a user's collection.  This expects two arguments:
+   keyfile:  the project keyfile
+   component:  the directory containing the component (shape sub-directories)
+
+ Created: 8/1/15 P. Athanas
+####################################################################
+"""
+
+import sys
+import os
+import logging
+from rda.cl.cl_database import push_component
+from rda.cl.cl_database import enable_logging
+from rda.cl.cl_database import build_environment
+from rda.cl.cl_database import CL_WORKDIR
+
+def add_comp(keyfile, compdir, comp_name):
+  build_environment()
+  if not os.path.isdir(CL_WORKDIR):
+     print "Creating work directory: "+CL_WORKDIR
+     os.mkdir(CL_WORKDIR)
+
+  if not os.path.isfile( keyfile ):
+     print "Cannot find keyfile: "+keyfile
+     exit(-1)
+  if not os.path.isdir( compdir ):
+     print "Cannot find component directory: "+compdir
+     exit(-1)
+     
+  try:
+     enable_logging('cl_addcomponent')
+     logger = logging.getLogger( 'cl_addcomponent')
+     logger.info("Adding component in ["+os.path.basename(compdir)+']')
+     push_component( compdir, comp_name, keyfile )
+     logger.info("Success.")
+
+  except Exception as err:
+     print "Failure: "+str(err.args)
+     exit(-1)
+
+if __name__ == "__main__":
+  if len(sys.argv) != 4:
+     print "Usage: "+sys.argv[0]+" [project_keyfile.conf] [component_directory] [component_name]"
+     exit(-1)
+  add_comp(sys.argv[1], sys.argv[2], sys.argv[3]);
+

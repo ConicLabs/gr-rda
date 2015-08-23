@@ -1,0 +1,74 @@
+#!/usr/bin/python
+"""
+####################################################################
+ cl_compile
+ Description:
+
+ This script compiles an extracted DAT file using the server.  Checks the local cache first. 
+  Inputs:
+   keyfile:  the project keyfile
+   edif1.dat:  the extracted netlist for a design
+
+ Created: 8/1/15 R. Marlow 
+####################################################################
+"""
+
+import sys
+import os
+import logging
+import shutil
+import optparse
+from shutil import rmtree
+from rda.cl.cl_database import open_cl_database 
+from rda.cl.cl_database import close_cl_database 
+from rda.cl.cl_database import extract_design 
+from rda.cl.cl_database import really_initialize_db 
+from rda.cl.cl_database import dump_components, dump_design_cache 
+from rda.cl.cl_database import remove_from_design_cache, clear_design_cache 
+from rda.cl.cl_database import enable_logging
+from rda.cl.cl_database import build_environment
+from rda.cl.cl_database import CL_WORKDIR
+
+p = optparse.OptionParser()
+p.add_option("-l", "--list", dest="listall", help="List all componenets and designs in the cache.", action="store_true", default=False)
+p.add_option("-k", "--key", dest="key", help="key [HASH] associated with the entry.", metavar="KEY")
+p.add_option("-d", "--delete", dest="delete_enter", help="delete the entry based on key option. If no key is given, the design cache is cleared entirely.", action="store_true", default=False)
+p.add_option("-e", "--extract", dest="extract", help="extract the assembly.dat design file based on key option.", action="store_true", default=False)
+
+(options,args) = p.parse_args()
+#print "args: ", args
+#print "options: ", options
+
+build_environment()
+if os.path.isdir(CL_WORKDIR):
+   rmtree( CL_WORKDIR )
+os.mkdir(CL_WORKDIR)
+
+#keyfile = sys.argv[1]
+#edif = sys.argv[2]
+enable_logging()
+while not open_cl_database():
+  logger.warning( "Database does not exist.  Creating.")
+  really_initialize_db(True)
+
+if (options.listall):
+  print "====================================================="
+  print "Display component cache."
+  dump_components()
+  print "====================================================="
+  print "Display design cache."
+  dump_design_cache()
+
+if(options.extract and options.key):
+  print "extracting assembly.dat with key=", options.key
+  extract_design(options.key)   
+
+if(options.delete_enter):
+  if(options.key):
+    print "deleting entry KEY=", options.key
+    remove_from_design_cache(options.key)
+  else:
+    clear_design_cache()
+
+#close the database and exit
+close_cl_database()

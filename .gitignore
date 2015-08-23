@@ -1,0 +1,4 @@
+build/
+*impact*.log
+*.pyc
+*.pyo

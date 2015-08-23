@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<block>
+  <name>Device3 with RDA</name>
+  <key>variable_uhd_device3_rda</key>
+  <import>from gnuradio import uhd</import>
+  <import>import ettus</import>
+  <import>import rda.enable_gr_rda as rda</import>
+  <import>import os</import>
+  <import>import inspect</import>
+	<var_make>
+self.enable_gr_rda = $(id)a = rda.enable_gr_rda(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), $(top_block), $(use_gr_rda), $(keyfile), $(debug))  
+self.device3 = $(id) = ettus.device3(uhd.device_addr_t( ",".join(($dev_addr, $dev_args)) ))</var_make>
+  <var_value>$dev_addr</var_value>
+  <make></make>
+  <param>
+    <name>Device Address</name>
+    <key>dev_addr</key>
+    <value>type=x300</value>
+    <type>string</type>
+    <hide>
+      \#if \$dev_addr()
+      none
+      \#else
+      part
+      \#end if
+    </hide>
+  </param>
+  <param>
+    <name>Device Arguments</name>
+    <key>dev_args</key>
+    <value>""</value>
+    <type>string</type>
+    <hide>
+      \#if \$dev_args()
+      none
+      \#else
+      part
+      \#end if
+    </hide>
+  </param>
+  <param>
+    <name>Generated Script Name</name>
+    <key>top_block</key>
+    <value>top_block.py</value>
+    <type>string</type>
+  </param>
+  <param>
+    <name>Use RDA?</name>
+    <key>use_gr_rda</key>
+    <type>enum</type>
+    <option>
+      <name>Yes</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>No</name>
+      <key>0</key>
+    </option>
+  </param>
+  <param>
+    <name>Key file</name>
+    <key>keyfile</key>
+    <value>~/keyfile.conf</value>		  
+    <type>file_open</type>
+  </param>  
+  <param>
+    <name>Run debug on? (limited)</name>
+    <key>debug</key>
+    <type>enum</type>
+    <option>
+      <name>No</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>Yes</name>
+      <key>1</key>
+    </option>
+  </param> 
+  <doc> Documentation explaining variables in this block!
+	If you want to turn off RDA and just use the USRP without reprogramming, "No" for "Use RDA?".
+        The Debugging features at this time are currently limited.</doc>
+</block>

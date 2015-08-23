@@ -1,0 +1,56 @@
+#!/usr/bin/python
+"""
+####################################################################
+ cl_compile
+ Description:
+
+ This script compiles an extracted DAT file using the server.  Checks the local cache first. 
+  Inputs:
+   keyfile:  the project keyfile
+   edif1.dat:  the extracted netlist for a design
+
+ Created: 8/1/15 P. Athanas
+####################################################################
+"""
+
+import sys
+import os
+import logging
+import shutil
+from shutil import rmtree
+from rda.cl.cl_database import assemble_design
+from rda.cl.cl_database import enable_logging
+from rda.cl.cl_database import build_environment
+from rda.cl.cl_database import CL_WORKDIR
+
+if len(sys.argv) != 3:
+   print "Usage: "+sys.argv[0]+" [project_keyfile.conf] ['edif' DAT file]"
+   exit(-1)
+
+build_environment()
+if os.path.isdir(CL_WORKDIR):
+   rmtree( CL_WORKDIR )
+os.mkdir(CL_WORKDIR)
+
+keyfile = sys.argv[1]
+edif = sys.argv[2]
+
+if not os.path.isfile( keyfile ):
+   print "Cannot find keyfile: "+keyfile
+   exit(-1)
+if not os.path.isfile( edif ):
+   print "Cannot find edif DAT file: "+edif
+   exit(-1)
+shutil.copy(edif, CL_WORKDIR)
+shutil.copy(keyfile, CL_WORKDIR)   
+try:
+   enable_logging('cl_compile')
+   logger = logging.getLogger( 'cl_compile')
+   logger.info("Assembling design in "+os.path.basename(edif))
+   assemble_design( CL_WORKDIR, datfile="edif1.dat" )
+except Exception as err:
+   print "Failure: "+str(err.args)
+   exit(-1)
+
+
+

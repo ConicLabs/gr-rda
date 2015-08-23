@@ -1,0 +1,65 @@
+#!/usr/bin/python
+"""
+####################################################################
+ cl_addlibrary
+ Description:
+
+This simple program adds all components from a library folder to a user's collection.  This expects two arguments:
+   keyfile:  the project keyfile
+   component_directory:  the directory containing the components (shape sub-directories)
+
+ Created: 8/20/15 Ali Sohanghpurwala
+####################################################################
+"""
+
+import sys
+import os
+import logging
+from rda.cl.cl_database import push_component
+from rda.cl.cl_database import enable_logging
+from rda.cl.cl_database import build_environment
+from rda.cl.cl_database import CL_WORKDIR
+
+def add_comp(keyfile, compdir, comp_name):
+  build_environment()
+  if not os.path.isdir(CL_WORKDIR):
+     print "Creating work directory: "+CL_WORKDIR
+     os.mkdir(CL_WORKDIR)
+
+  if not os.path.isfile( keyfile ):
+     print "Cannot find keyfile: "+keyfile
+     exit(-1)
+  if not os.path.isdir( compdir ):
+     print "Cannot find component directory: "+compdir
+     exit(-1)
+     
+  try:
+     push_component( compdir, comp_name, keyfile )
+
+  except Exception as err:
+     print "Failure: "+str(err.args)
+     exit(-1)
+
+if len(sys.argv) != 3:
+  print "Usage: "+sys.argv[0]+" [project_keyfile.conf] [component_directory]"
+  exit(-1)
+
+print sys.argv[2];
+comp_set = set()
+for root, dirs, files in os.walk(sys.argv[2]):
+  for f in files:
+    if f.endswith('.meta'):
+      comp_set.add(f[:-5]);
+print comp_set;
+try:
+  enable_logging('cl_addlibrary')
+  logger = logging.getLogger( 'cl_addlibrary')
+
+except Exception as err:
+  print "Failure: "+str(err.args)
+  exit(-1)
+compdir = sys.argv[2]
+for comp in comp_set:
+  logger.info("Adding component in ["+os.path.basename(compdir)+']')
+  add_comp(sys.argv[1], compdir, comp);
+  logger.info("Successfully added component: "+comp)

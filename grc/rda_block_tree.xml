@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##Block Tree for uhd blocks.
+###################################################
+ -->
+<cat>
+	<name></name> <!-- Blank for Root Name -->
+	<cat>
+		<name>UHD</name>
+		<cat>
+			<name>RFNoC</name>
+			<block>variable_uhd_device3_rda</block>
+		</cat>
+	</cat>
+</cat>
