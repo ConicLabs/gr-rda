@@ -56,8 +56,6 @@ CL_COMPILE_FILE = 'compile_run.conf'
 CL_WORKDIR = './build'
 CL_ASSEMBLY_FILE = 'assembly.dat'
 CL_COMPONENT_CONF = 'component.conf'
-CL_COMP_LIBDIR = '/local/rda/client_components/modules/lib/'
-
 #GLOBAL KEY_DICT
 PRJ_KEY_INFO = {
     "family" : "Xilinx_7Series",
@@ -84,9 +82,6 @@ def build_environment():
    if os.environ.has_key('CL_WORKDIR'):
       CL_WORKDIR = os.environ['CL_WORKDIR']
       print CL_WORKDIR
-   # CL_COMP_LIBDIR
-   #if os.environ.has_key('CL_WORKDIR'):
-   #   CL_WORKDIR = os.environ['CL_WORKDIR']
 
 ####################################################################
 # enable_logging
@@ -679,6 +674,8 @@ def assemble_design(builddir = CL_WORKDIR, keyfile="keyfile.conf", part=PRJ_KEY_
     salt = hashlib.sha1(str(random.random())).hexdigest()[:12]
     design_key,project_key,component_keys, platform = calculate_design_key(builddir, datfile, keyfile)
     print design_key
+    for eachkey in component_keys.itervalues(): 
+        extract_components(eachkey, builddir)
     if is_in_design_cache(design_key):
         logger.info( "Design has already been compiled and is in the design cache")
         extract_design(design_key, builddir)
@@ -686,8 +683,6 @@ def assemble_design(builddir = CL_WORKDIR, keyfile="keyfile.conf", part=PRJ_KEY_
     else:
         logger.info( "Design is NOT in the cache.  Push bundle to server.")
         logger.info( "Creating a cache entry ("+design_key+") and inserting assembly data.")
-        for eachkey in component_keys.itervalues(): 
-            extract_components(eachkey, builddir)
         # Create tarball of processing package and name it after the key
         logger.info( "Transferring compile request to server")
         tfilename = os.path.join(builddir, salt+'_run.tgz' )

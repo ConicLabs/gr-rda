@@ -22,12 +22,12 @@ include(GrPython)
 INSTALL(
     PROGRAMS
     rda_loader
+    add_gr_rda_module.sh
     DESTINATION bin
 )
 
 GR_PYTHON_INSTALL(
     PROGRAMS
-    add_gr_rda_module
     cl_cache_util
     cl_addcomponent
     cl_addlibrary

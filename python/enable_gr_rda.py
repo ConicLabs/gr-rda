@@ -88,7 +88,6 @@ class enable_gr_rda(gr.interp_block):
           dat_file = "/tmp/edif1.dat"
           rda_edif_dat.generate_dat(dat_file) 
           #verifies keyfile, checks component cache, and design cache. returns key and design cache hash
-          #TODO do all these things correctly
           build_environment()
           if os.path.isdir(WORKDIR):
             shutil.rmtree(WORKDIR)
@@ -131,13 +130,10 @@ class enable_gr_rda(gr.interp_block):
 
     def program(self):
       print sys.path[0]
-      #print RDA_LIB_ROOT
       os.chdir(WORKDIR)
       print os.getcwd()
-      #print os.path.join(RDA_LIB_ROOT+"static/lib/top.bit")
-      #print os.path.join(WORKDIR,".")
       shutil.copy(os.path.join(RDA_LIB_ROOT+"static/lib/top.bit"), os.path.join(WORKDIR,".")) 
-      pro = subprocess.call(['rda_loader', 'top.bit', 'assembly.dat', RDA_LIB_ROOT+'/modules/lib'])
+      pro = subprocess.call(['rda_loader', 'top.bit', 'assembly.dat', WORKDIR])
       assert pro == 0,  "Programming or Assembly Failed."
       print "Waiting a bit to let the FPGA boot up."
       time.sleep(5) 
