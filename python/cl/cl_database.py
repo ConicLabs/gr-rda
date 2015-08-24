@@ -43,6 +43,7 @@ import glob
 import tarfile
 import logging
 import random
+import zipfile
 from cl_transport import transport_assembly_run, transport_component
 
 # Handle to design/component DB
@@ -56,6 +57,7 @@ CL_COMPILE_FILE = 'compile_run.conf'
 CL_WORKDIR = './build'
 CL_ASSEMBLY_FILE = 'assembly.dat'
 CL_COMPONENT_CONF = 'component.conf'
+CL_DISTRIB_DB = os.environ['PYBOMBS_ROOT']+'/target/share/gr-rda/examples/cl_client_cache_public.zip'
 #GLOBAL KEY_DICT
 PRJ_KEY_INFO = {
     "family" : "Xilinx_7Series",
@@ -372,26 +374,34 @@ def really_initialize_db(really):
     global cldb
     if os.path.isfile(CL_DATABASE):
         if not really:
-            logger.warning( 'CL Database already exists. Will not overwrite it.  Really=False ')
+            logger.warning( 'CL component cache already exists. Will not overwrite it.  Really=False ')
             return False
         else:
             os.remove(CL_DATABASE)
     cldb = sqlite3.connect( CL_DATABASE )
-    # Check if tables are present
-    sqlcmd = '''CREATE TABLE component_cache( id int primary key,component_key text, timestamp 
-             datetime default( current_timestamp), family text, platform text, 
-             component_name text, group_member text, part integer, shape integer, bitfile blob, 
-             metafile blob);'''
-    cldb.execute(sqlcmd)
-    cldb.commit()
-    sqlcmd = '''CREATE TABLE design_cache (design_key primary key asc, timestamp 
-             datetime default( current_timestamp), platform text, part integer, 
-             assembly_file blob);'''
-    cldb.execute(sqlcmd)
+
+    # Get DB snapshot from pybombs distribution
+    print CL_DISTRIB_DB
+    if not os.path.isfile(CL_DISTRIB_DB):
+        logger.error( 'Cannot find distribution database: '+CL_DISTRIB_DB+'. Please check your installation.')
+	exit(1)
+    try:
+	with zipfile.ZipFile(CL_DISTRIB_DB) as zf:
+           zf.extractall(os.environ['HOME'])
+	   
+    except Exception as err:
+        print err[0]
+        logger.error( 'Difficulty installing the component cache:' + err[0] + '. ')
+	exit(1)
+
+    # Sanity check -- make sure it now exists
+    if not os.path.isfile(CL_DATABASE):
+        logger.error( 'Cannot find distribution database: '+CL_DISTRIB_DB+'. Please check your installation.')
+	exit(1)
+
     logger.info("Design / component database created.")
     cldb.commit()
     return True
-
 
 
 ####################################################################
