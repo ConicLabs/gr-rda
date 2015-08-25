@@ -23,7 +23,7 @@ satisfy_deb: uhd-host && libuhd-dev
 source: git://https://github.com/EttusResearch/uhd.git
 #gitbranch: master
 gitbranch: rfnoc-devel
-gitrev: 931dbffe72858593f6f6b24fd1470385b1140e17
+gitrev: 6188aabf07cbfd39d85fcd6ab668ed7eeec2d8d6
 inherit: cmake
 configuredir: host/build
 makedir: host/build
