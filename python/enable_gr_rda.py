@@ -92,25 +92,25 @@ class enable_gr_rda(gr.interp_block):
           if os.path.isdir(WORKDIR):
             shutil.rmtree(WORKDIR)
             os.mkdir(WORKDIR)
-            if not os.path.isfile( keyfile ):
-              print "Cannot find keyfile: " + keyfile
-              exit(-1)
-            if not os.path.isfile( dat_file ):
-              print "Cannot find edif DAT file: " + dat_file
-              exit(-1)
-            shutil.copy(dat_file, WORKDIR)
-            shutil.copy(keyfile, WORKDIR)
-            try:
-              cl.cl_database.build_environment()
-              cl.cl_database.enable_logging('cl_compile', workdir=WORKDIR)
-              logger = logging.getLogger( 'cl_compile')
-              logger.info("Assembling design in "+os.path.basename(dat_file))
-              cl.cl_database.assemble_design( WORKDIR, datfile=dat_file, keyfile=keyfile )
-            except Exception as err:
-              print "Failure: "+str(err.args)
-              exit(-1)
           else:
-            print WORKDIR, " WORKDIR is not a valid path."
+            print "NOTICE: Creating ", WORKDIR, " because it doesn't exist."
+            os.makedirs(WORKDIR)
+          if not os.path.isfile( keyfile ):
+            print "Cannot find keyfile: " + keyfile
+            exit(-1)
+          if not os.path.isfile( dat_file ):
+            print "Cannot find edif DAT file: " + dat_file
+            exit(-1)
+          shutil.copy(dat_file, WORKDIR)
+          shutil.copy(keyfile, WORKDIR)
+          try:
+            cl.cl_database.build_environment()
+            cl.cl_database.enable_logging('cl_compile', workdir=WORKDIR)
+            logger = logging.getLogger( 'cl_compile')
+            logger.info("Assembling design in "+os.path.basename(dat_file))
+            cl.cl_database.assemble_design( WORKDIR, datfile=dat_file, keyfile=keyfile )
+          except Exception as err:
+            print "Failure: "+str(err.args)
             exit(-1)
           #TODO file names are static for now.
           print "Running rda_loader and programming the device"
@@ -194,6 +194,15 @@ class enable_gr_rda(gr.interp_block):
           elif "window" in matched.group():
             matched2_fixed = "Window"
             line_index+=3
+            line = _top_lines[line_index]
+            if "-" in line:
+              matched_number_fixed = "0"
+            else:
+              matched_number_fixed = re.search("\s\d",line).group().replace(" ","")
+            matched_revision = ""
+          elif "vector_iir" in matched.group():
+            matched2_fixed = "VectorIIR"
+            line_index+=4
             line = _top_lines[line_index]
             if "-" in line:
               matched_number_fixed = "0"
